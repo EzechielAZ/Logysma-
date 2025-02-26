@@ -1,167 +1,224 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // Navbar scroll effect
-  const nav = document.querySelector('nav');
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 100) {
-      nav.classList.add('scrolled');
-    } else {
-      nav.classList.remove('scrolled');
-    }
-  });
+document.addEventListener('DOMContentLoaded', function() {
+    // Mobile navigation
+    const hamburger = document.querySelector('.hamburger');
+    const nav = document.querySelector('nav');
 
-  // Mobile menu toggle with animation
-  const menuBtn = document.querySelector('.menu-btn');
-  const navLinks = document.querySelector('.nav-links');
-
-  menuBtn.addEventListener('click', () => {
-    navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
-    if (navLinks.style.display === 'flex') {
-      setTimeout(() => {
-        navLinks.style.opacity = '1';
-        navLinks.style.transform = 'translateY(0)';
-      }, 10);
-    } else {
-      navLinks.style.opacity = '0';
-      navLinks.style.transform = 'translateY(-10px)';
-    }
-  });
-
-  // Enhanced parallax effect for phone mockup
-  let lastScroll = 0;
-  window.addEventListener('scroll', () => {
-    const phoneElement = document.querySelector('.phone-mockup');
-    const currentScroll = window.pageYOffset;
-    const scrollDirection = currentScroll > lastScroll ? 'down' : 'up';
-    
-    const rotation = (currentScroll - lastScroll) * 0.05;
-    phoneElement.style.transform = `
-      translateY(${currentScroll * 0.1}px)
-      rotate(${scrollDirection === 'down' ? rotation : -rotation}deg)
-    `;
-    
-    lastScroll = currentScroll;
-  });
-
-  // Improved Intersection Observer for staggered animations
-  const observerOptions = {
-    threshold: 0.2,
-    rootMargin: '0px 0px -100px 0px'
-  };
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry, index) => {
-      if (entry.isIntersecting) {
-        setTimeout(() => {
-          entry.target.classList.add('animate');
-        }, index * 100);
-      }
-    });
-  }, observerOptions);
-
-  // Observe features with enhanced animation
-  document.querySelectorAll('.feature').forEach(feature => {
-    observer.observe(feature);
-  });
-
-  // Add floating animation to specific elements
-  document.querySelectorAll('.cta-button, .app-store, .play-store').forEach(element => {
-    element.classList.add('floating');
-  });
-
-  // Enhanced mobile responsiveness
-  const handleResize = () => {
-    if (window.innerWidth > 768) {
-      navLinks.style.display = 'flex';
-      navLinks.style.opacity = '1';
-      navLinks.style.transform = 'translateY(0)';
-    } else {
-      navLinks.style.display = 'none';
-    }
-  };
-
-  window.addEventListener('resize', handleResize);
-  handleResize();
-
-  // Enhanced Mobile Navigation
-  const setupMobileNav = () => {
-    const mobileNav = document.querySelector('.mobile-nav');
-    const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
-    let lastScrollTop = 0;
-
-    window.addEventListener('scroll', () => {
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      
-      if (scrollTop > lastScrollTop && scrollTop > 100) {
-        mobileNav.style.transform = 'translateY(100%)';
-      } else {
-        mobileNav.style.transform = 'translateY(0)';
-      }
-      
-      lastScrollTop = scrollTop;
+    hamburger.addEventListener('click', function() {
+        nav.classList.toggle('active');
+        hamburger.classList.toggle('active');
     });
 
-    mobileNavItems.forEach(item => {
-      item.addEventListener('click', (e) => {
-        mobileNavItems.forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            
+            // Close mobile nav if open
+            if (nav.classList.contains('active')) {
+                nav.classList.remove('active');
+                hamburger.classList.remove('active');
+            }
+
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            
+            if (targetElement) {
+                window.scrollTo({
+                    top: targetElement.offsetTop - 80,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+
+    // Testimonials slider
+    const testimonials = document.querySelectorAll('.testimonial');
+    const dots = document.querySelectorAll('.dot');
+    const prevBtn = document.querySelector('.prev-btn');
+    const nextBtn = document.querySelector('.next-btn');
+    let currentSlide = 0;
+
+    // Hide all testimonials except the first one
+    testimonials.forEach((testimonial, index) => {
+        if (index !== 0) {
+            testimonial.style.display = 'none';
+        }
+    });
+
+    // Function to show a specific slide
+    function showSlide(n) {
+        // Hide all testimonials
+        testimonials.forEach(testimonial => {
+            testimonial.style.display = 'none';
+        });
         
-        // Add ripple effect
-        const ripple = document.createElement('div');
-        ripple.classList.add('ripple');
-        item.appendChild(ripple);
+        // Remove active class from all dots
+        dots.forEach(dot => {
+            dot.classList.remove('active');
+        });
         
-        setTimeout(() => ripple.remove(), 1000);
-      });
+        // Show the current testimonial and activate its dot
+        testimonials[n].style.display = 'block';
+        dots[n].classList.add('active');
+    }
+
+    // Next button click handler
+    nextBtn.addEventListener('click', function() {
+        currentSlide++;
+        if (currentSlide >= testimonials.length) {
+            currentSlide = 0;
+        }
+        showSlide(currentSlide);
     });
-  };
 
-  // Professional loading animation
-  const showLoadingAnimation = () => {
-    const loading = document.createElement('div');
-    loading.classList.add('loading-animation');
-    loading.innerHTML = `
-      <div class="loading-logo">
-        <h1>Logysma</h1>
-      </div>
-    `;
-    document.body.appendChild(loading);
-  };
-
-  // Initialize enhanced features
-  setupMobileNav();
-  showLoadingAnimation();
-
-  // Smooth scroll enhancement
-  const smoothScroll = (target, duration) => {
-    const targetPosition = target.getBoundingClientRect().top;
-    const startPosition = window.pageYOffset;
-    const distance = targetPosition - 60;
-    let startTime = null;
-
-    const animation = currentTime => {
-      if (startTime === null) startTime = currentTime;
-      const timeElapsed = currentTime - startTime;
-      const run = ease(timeElapsed, startPosition, distance, duration);
-      window.scrollTo(0, run);
-      if (timeElapsed < duration) requestAnimationFrame(animation);
-    };
-
-    const ease = (t, b, c, d) => {
-      t /= d / 2;
-      if (t < 1) return c / 2 * t * t + b;
-      t--;
-      return -c / 2 * (t * (t - 2) - 1) + b;
-    };
-
-    requestAnimationFrame(animation);
-  };
-
-  // Enhanced scroll handling
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      e.preventDefault();
-      const target = document.querySelector(this.getAttribute('href'));
-      smoothScroll(target, 1000);
+    // Previous button click handler
+    prevBtn.addEventListener('click', function() {
+        currentSlide--;
+        if (currentSlide < 0) {
+            currentSlide = testimonials.length - 1;
+        }
+        showSlide(currentSlide);
     });
-  });
+
+    // Dot click handlers
+    dots.forEach((dot, index) => {
+        dot.addEventListener('click', function() {
+            currentSlide = index;
+            showSlide(currentSlide);
+        });
+    });
+
+    // Auto-advance slides every 5 seconds
+    setInterval(function() {
+        currentSlide++;
+        if (currentSlide >= testimonials.length) {
+            currentSlide = 0;
+        }
+        showSlide(currentSlide);
+    }, 7000);
+
+    // FAQ accordion
+    const faqItems = document.querySelectorAll('.faq-item');
+    
+    faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        const answer = item.querySelector('.faq-answer');
+        const toggle = item.querySelector('.faq-toggle');
+        
+        question.addEventListener('click', () => {
+            // Close all other items
+            faqItems.forEach(otherItem => {
+                if (otherItem !== item && otherItem.classList.contains('active')) {
+                    otherItem.classList.remove('active');
+                    otherItem.querySelector('.faq-toggle i').className = 'fas fa-plus';
+                }
+            });
+            
+            // Toggle current item
+            item.classList.toggle('active');
+            
+            // Change icon
+            if (item.classList.contains('active')) {
+                toggle.querySelector('i').className = 'fas fa-minus';
+            } else {
+                toggle.querySelector('i').className = 'fas fa-plus';
+            }
+        });
+    });
+    
+    // Counter animation for stats
+    const stats = document.querySelectorAll('.stat-number');
+    
+    const animateCounter = (el, start = 0, end, duration = 2000) => {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            const value = Math.floor(progress * (end - start) + start);
+            el.textContent = value + (el.dataset.suffix || '');
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            }
+        };
+        window.requestAnimationFrame(step);
+    };
+    
+    // Initialize counter animation when element is in viewport
+    const isInViewport = (el) => {
+        const rect = el.getBoundingClientRect();
+        return (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+        );
+    };
+    
+    const handleScroll = () => {
+        stats.forEach(stat => {
+            if (isInViewport(stat) && !stat.dataset.counted) {
+                stat.dataset.counted = true;
+                const end = parseInt(stat.textContent, 10);
+                animateCounter(stat, 0, end);
+            }
+        });
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    
+    // Run once on load
+    handleScroll();
+    
+    // Form validation and submission
+    const waitlistForm = document.getElementById('waitlist-form');
+    const formSuccess = document.getElementById('form-success');
+
+    waitlistForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // In a real implementation, you would send the form data to your server
+        // For this example, we'll just simulate a successful submission
+        
+        // Get form data
+        const formData = new FormData(waitlistForm);
+        const data = Object.fromEntries(formData.entries());
+        
+        // Add loading state to button
+        const submitButton = waitlistForm.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.textContent;
+        submitButton.textContent = 'Traitement en cours...';
+        submitButton.disabled = true;
+        
+        // Simulate network request
+        setTimeout(function() {
+            // Hide the form and show success message
+            waitlistForm.style.display = 'none';
+            formSuccess.classList.remove('hidden');
+            
+            // Log the collected data (for demonstration purposes)
+            console.log('Form submitted with data:', data);
+            
+            // Reset button state
+            submitButton.textContent = originalButtonText;
+            submitButton.disabled = false;
+            
+             //In a real implementation, you would send this data to your server
+             fetch('https://formspree.io/f/xpwqgeze', {
+                 method: 'POST',
+                 headers: {
+                     'Content-Type': 'application/json',
+                 },
+                 body: JSON.stringify(data),
+             })
+             .then(response => response.json())
+             .then(data => {
+                 waitlistForm.style.display = 'none';
+                 formSuccess.classList.remove('hidden');
+             })
+             .catch(error => {
+                 console.error('Error:', error);
+                 // Show error message to user
+             });
+        }, 1500);
+    });
 });
